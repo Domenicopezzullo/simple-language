@@ -1,4 +1,3 @@
-
 #[derive(Debug)]
 pub enum Token {
     Ident(String),
@@ -11,6 +10,7 @@ pub enum Token {
     DEquals,
     If,
     ColonColon,
+    Builtin(String),
 }
 
 pub fn lex(src: &str) -> Vec<Token> {
@@ -36,7 +36,18 @@ pub fn lex(src: &str) -> Vec<Token> {
                     tokens.push(Token::ColonColon);
                 }
             }
-
+            '@' => {
+                let mut ident = String::new();
+                while let Some(&next) = chars.peek() {
+                    if next.is_ascii_alphanumeric() || next == '_' {
+                        chars.next();
+                        ident.push(next);
+                    } else {
+                        break;
+                    }
+                }
+                tokens.push(Token::Builtin(ident));
+            }
             '"' => {
                 let mut value = String::new();
 
@@ -58,7 +69,9 @@ pub fn lex(src: &str) -> Vec<Token> {
             c if c.is_ascii_digit() => {
                 let mut num = (c as u8 - b'0') as i32;
                 while let Some(&next) = chars.peek() {
-                    if !next.is_ascii_digit() {break;}
+                    if !next.is_ascii_digit() {
+                        break;
+                    }
                     chars.next();
                     num = num * 10 + (next as u8 - b'0') as i32;
                 }
@@ -72,11 +85,13 @@ pub fn lex(src: &str) -> Vec<Token> {
                     if next.is_ascii_alphanumeric() || next == '_' {
                         chars.next();
                         ident.push(next);
-                    } else {break};
+                    } else {
+                        break;
+                    };
                 }
                 let token = match ident.as_str() {
                     "if" => Token::If,
-                    _ => Token::Ident(ident)
+                    _ => Token::Ident(ident),
                 };
                 tokens.push(token);
             }

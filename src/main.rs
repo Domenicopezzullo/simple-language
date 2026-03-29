@@ -26,7 +26,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         [] => {
             eprintln!("Usage: <binary> <filename>")
         }
-
     }
 
     Ok(())

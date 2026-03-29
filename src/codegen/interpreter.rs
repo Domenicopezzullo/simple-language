@@ -1,15 +1,18 @@
-use crate::ir::{IR,IRArg,Condition};
+use crate::ir::{Condition, IR, IRArg};
 
 use std::collections::HashMap;
 
 pub struct Interpreter {
     functions: HashMap<String, Vec<IR>>,
-    variables: HashMap<String, i32>
+    variables: HashMap<String, i32>,
 }
 
 impl Interpreter {
     pub fn new() -> Self {
-        Self { functions: HashMap::new(), variables: HashMap::new() }
+        Self {
+            functions: HashMap::new(),
+            variables: HashMap::new(),
+        }
     }
 
     fn resolve(&self, arg: &IRArg) -> IRArg {
@@ -22,7 +25,7 @@ impl Interpreter {
                     IRArg::Int(0)
                 }
             }
-            other => other.clone()
+            other => other.clone(),
         }
     }
 
@@ -33,19 +36,19 @@ impl Interpreter {
     }
     fn eval(&mut self, node: &IR) {
         match node {
-            IR::FuncDef{name, body} => {
+            IR::FuncDef { name, body } => {
                 self.functions.insert(name.clone(), body.clone());
             }
-            IR::If {condition, body} => {
+            IR::If { condition, body } => {
                 let result = match condition {
-                    Condition::Equals(a,b) =>  self.resolve(a) == self.resolve(b),
+                    Condition::Equals(a, b) => self.resolve(a) == self.resolve(b),
                 };
                 if result {
                     self.run(body);
                 }
-            },
-            IR::Funcall{name, args} => {
-                if name == "println" {
+            }
+            IR::Funcall { name, args } => {
+                if name == "@println" {
                     for arg in args {
                         match arg {
                             IRArg::Var(name) => {
@@ -63,7 +66,9 @@ impl Interpreter {
                 }
                 if let Some(body) = self.functions.get(name).cloned() {
                     self.run(&body);
-                } else { eprintln!("Error: undefined function '{}'", name) }
+                } else {
+                    eprintln!("Error: undefined function '{}'", name)
+                }
             }
             IR::VarAssignment { name, value } => {
                 self.variables.insert(name.clone(), *value);
